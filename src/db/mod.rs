@@ -1,5 +1,6 @@
 use diesel::{prelude::*, sqlite::SqliteConnection};
 use serde::{Deserialize, Serialize};
+use std::env;
 
 pub mod schema;
 //pub mod models; // we add models directly in country specific files
@@ -17,8 +18,8 @@ pub struct DbResponse {
 }
 
 pub fn establish_connection() -> SqliteConnection {
-    let db = "./resources/db.sqlite3";
-    SqliteConnection::establish(db).unwrap_or_else(|_| panic!("Error connecting to {}", db))
+    let db_path = format!("{}/db.sqlite3", env::var("IBAN_BEAVER_RESOURCES").unwrap_or("./resources".into()));
+    SqliteConnection::establish(&db_path).unwrap_or_else(|_| panic!("Error connecting to {}", db_path))
 }
 
 pub fn fill_database(country: String) -> DbResponse {

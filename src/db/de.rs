@@ -7,6 +7,7 @@ use diesel::{prelude::*, sqlite::SqliteConnection};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::fs::File;
+use std::env;
 use curl::easy::Easy;
 
 #[derive(Debug, Serialize, Deserialize, Insertable, Queryable)]
@@ -76,10 +77,9 @@ pub fn fill_table_request(connection: &SqliteConnection) -> DbResponse {
 }
 pub fn fill_table(connection: &SqliteConnection) -> Result<(), calamine::Error> {
     // --- parse xml ---
-    let path = format!(
-        "{}/resources/blz-aktuell-xls-data.xlsx",
-        env!("CARGO_MANIFEST_DIR")
-    );
+
+    let path = format!("{}/de-data-download.xlsx", env::var("IBAN_BEAVER_RESOURCES").unwrap_or("./resources".into()));
+
     let mut workbook: Xlsx<_> = open_workbook(path)?;
 
     let range = workbook
@@ -102,14 +102,7 @@ pub fn blacklist(connection: &SqliteConnection, bank_code: i32, op: db::Blacklis
         db::BlacklistOp::Remove => false,
     }; 
     // UPDATE t_de SET blacklisted = REPLACE(blacklisted, false, true) WHERE code = 10077777;
-    //update(t_de.filter(code.eq(bank_code)).set(blacklisted.eq(true)).execute(connection);
     let result = update(t_de.filter(code.eq_all(bank_code))).set(blacklisted.eq_all(new_value)).execute(connection);
-    /*
-    let result = replace_into(t_de)
-        .values((code.eq(bank_code), blacklisted.eq(new_value)))
-        .execute(connection);
-
-        */
 
     match result {
         Ok(_) => DbResponse {
@@ -130,13 +123,11 @@ pub fn download_data_request() -> DbResponse {
     }
 }
 pub fn download_data() -> Result<(), curl::Error> {
-    let path = format!(
-        "{}/resources/de-data-download.xlsx",
-        env!("CARGO_MANIFEST_DIR")
-    );
+    let path = format!("{}/de-data-download.xlsx", env::var("IBAN_BEAVER_RESOURCES").unwrap_or("./resources".into()));
     if let Ok(mut file) = File::create(&path) {
         let mut easy = Easy::new();
         easy.url("https://www.bundesbank.de/resource/blob/602630/38698577eac2fb9d6fe2265bbbeacdd5/mL/blz-aktuell-xls-data.xlsx")?;
+        easy.follow_location(true)?;
         easy.write_function(move |data| {
             file.write_all(data).unwrap();
             Ok(data.len())
