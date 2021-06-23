@@ -6,7 +6,7 @@ use warp::Filter;
 #[tokio::main]
 async fn main() {
     // verifies iban
-    let iban = warp::any()
+    let verify_iban = warp::any()
         .and(warp::path("iban"))
         .and(warp::path::param::<String>())
         .map(|iban| warp::reply::json(&iban::verify(&iban)));
@@ -24,8 +24,8 @@ async fn main() {
     // blacklists iban
     let blacklist = warp::any()
         .and(warp::path!("db" / "blacklist" / String / String))
-        .map(|iban, op| warp::reply::json(&iban::blacklist_request(&iban, &op)));
+        .map(|iban, op| warp::reply::json(&iban::blacklist_request(iban, op)));
 
-    let routes = warp::get().and(iban.or(database_update).or(fill_database).or(blacklist));
+    let routes = warp::get().and(verify_iban.or(database_update).or(fill_database).or(blacklist));
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await
 }

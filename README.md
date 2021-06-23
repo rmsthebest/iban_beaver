@@ -80,6 +80,9 @@
 
 IBAN Beaver is a webapp that verifies an IBAN upon request. The response is a json object with information about the associated bank (if any). It is free to use, but keep in mind that this is just a project to learn about webby things and databases. Don't sue me if you use this for billing and something goes wrong.
 
+### Supported Countries
+* Germany
+* Austria
 
 ### Built With
 
@@ -93,11 +96,11 @@ IBAN Beaver is a webapp that verifies an IBAN upon request. The response is a js
 Only tested on GNU Linux.
 
 * rust / cargo
-* sqlite3-dev
-* curl-dev
+* base-devel / build-essential / your distros dev meta-package
 * diesel_cli, needed for diesel migrations. See their doc.
   ```sh
-   cargo install diesel_cli
+   cargo install diesel_cli # generic
+   sudo pacman -S diesel-cli # arch
   ```
 
 ### Installation

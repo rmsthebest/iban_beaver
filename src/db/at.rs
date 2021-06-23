@@ -1,27 +1,29 @@
-use super::{schema::*, DbResponse};
+//Kennzeichen;Identnummer;Bankleitzahl;Institutsart;Sektor;Firmenbuchnummer;Bankenname;Straße;PLZ;Ort;Postadresse / Straße;Postadresse / PLZ;Postadresse / Ort;Postfach;Bundesland;Telefon;Fax;E-Mail;SWIFT-Code;Homepage;Gründungsdatum
+//Mark; identification number; bank code; type of institution; sector; commercial register number; bank name; street; post code; place; postal address / street; postal address / post code; postal address / place; PO box; state; telephone; fax; e-mail; SWIFT code; homepage; Establishment date
 use crate::iban;
-use calamine::{open_workbook, RangeDeserializerBuilder, Reader, Xlsx};
-use curl::easy::Easy;
+use super::{schema::*, DbResponse};
 use diesel::{prelude::*, sqlite::SqliteConnection};
 use serde::{Deserialize, Serialize};
 use std::env;
+use curl::easy::Easy;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read, Write};
+use csv;
 
 #[derive(Debug, Serialize, Deserialize, Insertable, Queryable)]
-#[table_name = "t_de"]
+#[table_name = "t_at"]
 pub struct BankData {
-    #[serde(rename = "Datensatz-nummer")]
-    id: i32,
+    #[serde(rename = "Identnummer")]
+    id: i32, // Ident numbers arent unique in austria, could remove this field
     #[serde(rename = "Bankleitzahl")]
-    code: i32,
-    #[serde(rename = "Kurzbezeichnung")]
+    code: i32, // iban is unique in this db, using as primary key
+    #[serde(rename = "Bankenname")]
     name: String,
     #[serde(rename = "PLZ")]
     zip: i32,
     #[serde(rename = "Ort")]
     city: String,
-    #[serde(rename = "BIC")]
+    #[serde(rename = "SWIFT-Code")]
     bic: Option<String>,
 }
 impl From<BankData> for iban::BankData {
@@ -37,15 +39,15 @@ impl From<BankData> for iban::BankData {
 }
 
 fn create_entry(connection: &SqliteConnection, bank_data: BankData) {
-    diesel::insert_into(t_de::table)
+    diesel::insert_into(t_at::table)
         .values(&bank_data)
         .execute(connection)
         .expect("Error inserting new task"); // crash on failure is correct here
 }
 
 pub fn get_bank_data(connection: &SqliteConnection, iban_bank_code: i32) -> Option<iban::BankData> {
-    use super::schema::t_de::dsl::*;
-    let data = t_de
+    use super::schema::t_at::dsl::*;
+    let data = t_at
         .filter(code.eq(iban_bank_code))
         .limit(1)
         .load::<BankData>(connection)
@@ -57,7 +59,7 @@ pub fn get_bank_data(connection: &SqliteConnection, iban_bank_code: i32) -> Opti
         None => None,
     }
 }
-
+// This function could be country generic
 pub fn fill_table_request(connection: &SqliteConnection) -> DbResponse {
     match fill_table(connection) {
         Ok(()) => DbResponse {
@@ -70,36 +72,41 @@ pub fn fill_table_request(connection: &SqliteConnection) -> DbResponse {
         },
     }
 }
-pub fn fill_table(connection: &SqliteConnection) -> Result<(), calamine::Error> {
-    // --- parse xml ---
-
+pub fn fill_table(connection: &SqliteConnection) -> Result<(), csv::Error> {
+    // --- parse csv ---
     let path = format!(
-        "{}/de-data-download.xlsx",
+        "{}/at-data-download.csv",
         env::var("IBAN_BEAVER_RESOURCES").unwrap_or("./resources".into())
     );
     // drop table if it exists already
-    diesel::delete(t_de::table).execute(connection).unwrap();
+    diesel::delete(t_at::table).execute(connection).unwrap();
 
-    let mut workbook: Xlsx<_> = open_workbook(path)?;
+    // Fancy footwork to deal with ISO-8859-1 to UTF-8
+    let mut file = File::open(path)?;
+    let mut buf:Vec<u8> = Vec::new();
+    file.read_to_end(&mut buf)?;
+    // The skip is to skip the garbage above header. Very fragile. Should maybe do it some other way...
+    let utf8_csv = buf.iter().map(|&c| c as char).skip(512).collect::<String>();
 
-    let range = workbook
-        .worksheet_range("Daten")
-        .ok_or(calamine::Error::Msg("Cannot find 'Daten'"))??;
-    let iter = RangeDeserializerBuilder::new().from_range(&range)?;
-
-    // put in db
-    for result in iter {
+    let mut rdr = csv::ReaderBuilder::new()
+    .delimiter(b';')
+    .flexible(true)
+    .from_reader(utf8_csv.as_bytes());
+    //println!("{:?}", rdr.headers());
+    for result in rdr.deserialize() {
+        //println!("{:?}", result);
         let bank_data: BankData = result?;
         create_entry(connection, bank_data);
     }
+
     Ok(())
 }
-
+// This one should probably be generic
 pub fn download_data_request() -> DbResponse {
     match download_data() {
         Ok(_) => DbResponse {
             success: true,
-            message: format!("Downloaded database for Germany (de)"),
+            message: format!("Downloaded database for Austria (at)"),
         },
         Err(e) => DbResponse {
             success: false,
@@ -107,14 +114,15 @@ pub fn download_data_request() -> DbResponse {
         },
     }
 }
+// still de
 pub fn download_data() -> Result<(), curl::Error> {
     let path = format!(
-        "{}/de-data-download.xlsx",
+        "{}/at-data-download.csv",
         env::var("IBAN_BEAVER_RESOURCES").unwrap_or("./resources".into())
     );
     if let Ok(mut file) = File::create(&path) {
         let mut easy = Easy::new();
-        easy.url("https://www.bundesbank.de/resource/blob/602630/38698577eac2fb9d6fe2265bbbeacdd5/mL/blz-aktuell-xls-data.xlsx")?;
+        easy.url("https://www.oenb.at/docroot/downloads_observ/sepa-zv-vz_gesamt.csv")?;
         easy.follow_location(true)?;
         easy.write_function(move |data| {
             file.write_all(data).unwrap();

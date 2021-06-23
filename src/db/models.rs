@@ -1,4 +1,6 @@
-use super::schema::t_de;
+// THIS FILE ISNT USED AT THE MOMENT
+// Keeping it around for reference for now
+use super::schema::*;
 
 #[derive(Insertable, Queryable)]
 #[table_name = "t_de"]
@@ -27,4 +29,11 @@ impl From<super::de::BankData> for DeBankData {
             bic: bd.bic.clone(), 
         }
     }
+}
+
+#[derive(Insertable, Queryable)]
+#[table_name = "blacklist"]
+pub struct Blacklist {
+    iban: String,
+    blacklisted: bool,
 }
