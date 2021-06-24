@@ -123,6 +123,13 @@ Only tested on GNU Linux.
 
 # Server Side
 See step 2 in [Installation](#Installation)
+By default a resources directory is expected to exist from where you are running iban_beaver.
+If you install it somewhere else like /usr/local/bin you may want to run it like this:
+```sh
+mkdir -p ~/.local/share/iban_beaver/resources
+mv /path/to/db.sqlite ~/.local/share/iban_beaver/resources
+env IBAN_BEAVER_RESOURCES=~/.local/share/iban_beaver/resources iban_beaver
+```
 
 # Client/User
 Verify IBAN
@@ -153,8 +160,7 @@ If someone [opens an issue](https://github.com/rmsthebest/iban_beaver/issues) I 
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Fixes are welcome, but I make no promises to pay attention.
-If you want to add support for another country's iban I recommend taking a look at `src/db/de.rs`.
+This is a best effort project, I might move on with my life and never see your contribution.
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
