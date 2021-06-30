@@ -1,6 +1,4 @@
-//use calamine::Error;
-//use serde::{Deserialize, Serialize};
-use iban_beaver::country::*;
+use iban_beaver::interface::*;
 use warp::Filter;
 
 #[tokio::main]
@@ -9,22 +7,22 @@ async fn main() {
     let verify_iban = warp::any()
         .and(warp::path("iban"))
         .and(warp::path::param::<String>())
-        .map(|iban| warp::reply::json(&verify_request(&iban)));
+        .map(|iban: String| warp::reply::json(&verify_request(&iban)));
 
     // attempts to download new data and fill database
     let database_update = warp::any()
         .and(warp::path!("db" / "update" / String))
-        .map(|country| warp::reply::json(&update_table_request(&country)));
+        .map(|country: String| warp::reply::json(&update_table_request(&country)));
 
     // fills database with data that is already downloaded
     let fill_database = warp::any()
         .and(warp::path!("db" / "fill" / String))
-        .map(|country| warp::reply::json(&fill_table_request(&country)));
+        .map(|country: String| warp::reply::json(&fill_table_request(&country)));
 
     // blacklists iban
     let blacklist = warp::any()
         .and(warp::path!("db" / "blacklist" / String / String))
-        .map(|iban, op| warp::reply::json(&blacklist_request(&iban, &op)));
+        .map(|iban: String, op: String| warp::reply::json(&blacklist_request(&iban, &op)));
 
     let routes = warp::get().and(
         verify_iban

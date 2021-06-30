@@ -8,7 +8,7 @@ table! {
 table! {
     t_at (code) {
         id -> Integer,
-        code -> Integer,
+        code -> Text,
         name -> Text,
         zip -> Integer,
         city -> Text,
@@ -19,7 +19,7 @@ table! {
 table! {
     t_de (id) {
         id -> Integer,
-        code -> Integer,
+        code -> Text,
         name -> Text,
         zip -> Integer,
         city -> Text,
@@ -27,4 +27,17 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(blacklist, t_at, t_de,);
+table! {
+    t_nl (code) {
+        code -> Text,
+        name -> Text,
+        bic -> Text,
+    }
+}
+
+allow_tables_to_appear_in_same_query!(
+    blacklist,
+    t_at,
+    t_de,
+    t_nl,
+);

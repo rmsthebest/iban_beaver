@@ -83,6 +83,7 @@ IBAN Beaver is a webapp that verifies an IBAN upon request. The response is a js
 ### Supported Countries
 * Germany
 * Austria
+* Netherlands
 
 ### Built With
 
@@ -152,7 +153,7 @@ curl 127.0.0.1:3030/db/blacklist/<iban>
 <!-- ROADMAP -->
 ## Roadmap
 
-I'm not that ambitious.
+I'm not that ambitious. If you assume current status is all you're going to get you are most likely right.
 If someone [opens an issue](https://github.com/rmsthebest/iban_beaver/issues) I might work on that.
 
 
@@ -168,6 +169,12 @@ This is a best effort project, I might move on with my life and never see your c
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+# Steps to add support for a country
+
+1. Create `src/country/<countrycode>.rs` in `src/country`
+2. Satisfy the country trait (copy a similar country and fix what needs to be fixed)
+3. Add country to match statement in `src/country/mod.rs`
+4. Test the update/fill/iban commands. Valid ibans for testing can be found [here](https://wise.com/gb/iban/example)
 
 <!-- Acknowledgements -->
 ## Acknowledgements

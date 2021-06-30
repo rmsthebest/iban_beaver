@@ -15,7 +15,7 @@ pub struct BankData {
     #[serde(rename = "Identnummer")]
     id: i32, // Ident numbers arent unique in austria, could remove this field
     #[serde(rename = "Bankleitzahl")]
-    code: i32, // iban is unique in this db, using as primary key
+    code: String, // iban is unique in this db, using as primary key
     #[serde(rename = "Bankenname")]
     name: String,
     #[serde(rename = "PLZ")]
@@ -46,7 +46,7 @@ fn create_entry(connection: &SqliteConnection, bank_data: BankData) {
 fn download_data() -> Result<(), curl::Error> {
     let path = format!(
         "{}/at-data-download.csv",
-        env::var("IBAN_BEAVER_RESOURCES").unwrap_or("./resources".into())
+        env::var("IBAN_BEAVER_RESOURCES").unwrap_or_else(|_| "./resources".into())
     );
     if let Ok(mut file) = File::create(&path) {
         let mut easy = Easy::new();
@@ -67,11 +67,11 @@ impl Db for At {
     fn get_bank_data(
         &self,
         connection: &SqliteConnection,
-        iban_bank_code: i32,
+        bank_code: &str,
     ) -> Result<super::BankData, String> {
         use super::schema::t_at::dsl::*;
         let data = t_at
-            .filter(code.eq(iban_bank_code))
+            .filter(code.eq(bank_code))
             .limit(1)
             .load::<BankData>(connection)
             .expect("Error loading posts")
@@ -87,7 +87,7 @@ impl Db for At {
         // --- parse csv ---
         let path = format!(
             "{}/at-data-download.csv",
-            env::var("IBAN_BEAVER_RESOURCES").unwrap_or("./resources".into())
+            env::var("IBAN_BEAVER_RESOURCES").unwrap_or_else(|_| "./resources".into())
         );
         // drop table if it exists already
         diesel::delete(t_at::table).execute(connection).unwrap();
@@ -123,7 +123,7 @@ impl Db for At {
     }
 }
 impl Iban for At {
-    fn verify_length(&self, iban: &String) -> Result<(), String> {
+    fn verify_length(&self, iban: &str) -> Result<(), String> {
         let nof_chars = iban.chars().count();
         if nof_chars == 20 {
             Ok(())
@@ -132,13 +132,11 @@ impl Iban for At {
         }
     }
 
-    fn bank_code(&self, iban: &String) -> i32 {
+    fn bank_code(&self, iban: &str) -> String {
         iban.chars()
             .skip(4)
             .take(5)
             .collect::<String>()
-            .parse::<i32>()
-            .unwrap()
     }
 }
 impl Country for At {}

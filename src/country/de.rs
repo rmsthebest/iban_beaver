@@ -1,6 +1,6 @@
 // Germany
 use super::schema::t_de;
-use super::{Country, Db, Iban};
+use crate::{country::Country, country::Iban, db::Db};
 use calamine::{open_workbook, RangeDeserializerBuilder, Reader, Xlsx};
 use curl::easy::Easy;
 use diesel::{prelude::*, sqlite::SqliteConnection};
@@ -15,7 +15,7 @@ pub struct BankData {
     #[serde(rename = "Datensatz-nummer")]
     id: i32,
     #[serde(rename = "Bankleitzahl")]
-    code: i32,
+    code: String,
     #[serde(rename = "Kurzbezeichnung")]
     name: String,
     #[serde(rename = "PLZ")]
@@ -45,7 +45,7 @@ fn create_entry(connection: &SqliteConnection, bank_data: BankData) {
 fn download_data() -> Result<(), curl::Error> {
     let path = format!(
         "{}/de-data-download.xlsx",
-        env::var("IBAN_BEAVER_RESOURCES").unwrap_or("./resources".into())
+        env::var("IBAN_BEAVER_RESOURCES").unwrap_or_else(|_| "./resources".into())
     );
     if let Ok(mut file) = File::create(&path) {
         let mut easy = Easy::new();
@@ -66,11 +66,11 @@ impl Db for De {
     fn get_bank_data(
         &self,
         connection: &SqliteConnection,
-        iban_bank_code: i32,
+        bank_code: &str,
     ) -> Result<super::BankData, String> {
         use super::schema::t_de::dsl::*;
         let data = t_de
-            .filter(code.eq(iban_bank_code))
+            .filter(code.eq(bank_code))
             .limit(1)
             .load::<BankData>(connection)
             .expect("Error loading posts")
@@ -87,7 +87,7 @@ impl Db for De {
 
         let path = format!(
             "{}/de-data-download.xlsx",
-            env::var("IBAN_BEAVER_RESOURCES").unwrap_or("./resources".into())
+            env::var("IBAN_BEAVER_RESOURCES").unwrap_or_else(|_| "./resources".into())
         );
         // drop table if it exists already
         diesel::delete(t_de::table).execute(connection).unwrap();
@@ -117,7 +117,7 @@ impl Db for De {
     }
 }
 impl Iban for De {
-    fn verify_length(&self, iban: &String) -> Result<(), String> {
+    fn verify_length(&self, iban: &str) -> Result<(), String> {
         let nof_chars = iban.chars().count();
         if nof_chars == 22 {
             Ok(())
@@ -126,13 +126,11 @@ impl Iban for De {
         }
     }
 
-    fn bank_code(&self, iban: &String) -> i32 {
+    fn bank_code(&self, iban: &str) -> String {
         iban.chars()
             .skip(4)
             .take(8)
             .collect::<String>()
-            .parse::<i32>()
-            .unwrap()
     }
 }
 impl Country for De {}
