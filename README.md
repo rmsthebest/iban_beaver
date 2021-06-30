@@ -147,7 +147,7 @@ curl 127.0.0.1:3030/db/fill/<country>
 ```
 Blacklist IBAN
 ```sh
-curl 127.0.0.1:3030/db/blacklist/<iban>
+curl 127.0.0.1:3030/db/blacklist/<iban>/<add or remove>
 ```
 
 <!-- ROADMAP -->
@@ -171,7 +171,7 @@ This is a best effort project, I might move on with my life and never see your c
 
 # Steps to add support for a country
 
-1. Create `src/country/<countrycode>.rs` in `src/country`
+1. Create `src/country/<countrycode>.rs`
 2. Satisfy the country trait (copy a similar country and fix what needs to be fixed)
 3. Add country to match statement in `src/country/mod.rs`
 4. Test the update/fill/iban commands. Valid ibans for testing can be found [here](https://wise.com/gb/iban/example)
