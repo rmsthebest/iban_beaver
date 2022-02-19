@@ -14,5 +14,3 @@ dotenv = "0.15"
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1", features = ["full"] } # warp needs tokio
 warp = "0.3"
-#for docker users, or people who dont can't install sqlite
-#libsqlite3-sys = { version = "*", features = ["bundled"] }
