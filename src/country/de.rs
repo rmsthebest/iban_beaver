@@ -14,7 +14,7 @@ use std::io::Write;
 pub struct BankData {
     #[serde(rename = "Datensatz-nummer")]
     id: i32,
-    #[serde(rename = "Bankleitzahl")]
+    #[serde(rename = "Bank-leitzahl")]
     code: String,
     #[serde(rename = "Kurzbezeichnung")]
     name: String,
