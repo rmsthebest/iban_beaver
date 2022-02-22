@@ -189,7 +189,7 @@ Distributed under the AGPL-v3 License. See `LICENSE` for more information.
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/rmsthebest/iban_beaver.svg
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
+[contributors-url]: https://github.com/rmsthebest/iban_beaver/graphs/contributors
 [issues-shield]: https://img.shields.io/github/issues/rmsthebest/iban_beaver.svg
 [issues-url]: https://github.com/rmsthebest/iban_beaver/issues
 [license-shield]: https://img.shields.io/github/license/rmsthebest/iban_beaver.svg
