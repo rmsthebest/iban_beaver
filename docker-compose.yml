@@ -1,0 +1,12 @@
+services:
+  iban_beaver:
+    image: iban_beaver
+    ports:
+      - 3030:3030
+    volumes:
+      - /resources:/resources
+      - /images:/images
+      - /migrations:/migrations
+    environment:
+      - "IBAN_BEAVER_RESOURCES=./resources"
+      - "DATABASE_URL=./resources/db.sqlite3"
