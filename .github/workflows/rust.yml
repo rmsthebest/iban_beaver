@@ -19,7 +19,8 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Setup Database
-      run: diesel setup
+      run: cargo install diesel_cli --no-default-features --features=sqlite
+           diesel setup
            diesel migration run
     - name: Run tests
       run: cargo test --verbose -- --include-ignored 
