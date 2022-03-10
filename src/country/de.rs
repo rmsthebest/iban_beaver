@@ -1,6 +1,6 @@
 // Germany
 use super::schema::t_de;
-use crate::{country::Country, country::Iban, db::Db};
+use crate::{country::Country, db::Db};
 use calamine::{open_workbook, RangeDeserializerBuilder, Reader, Xlsx};
 use curl::easy::Easy;
 use diesel::{prelude::*, sqlite::SqliteConnection};
@@ -114,23 +114,6 @@ impl Db for De {
         download_data()?;
         self.fill_table(connection)?;
         Ok(())
-    }
-}
-impl Iban for De {
-    fn verify_length(&self, iban: &str) -> Result<(), String> {
-        let nof_chars = iban.chars().count();
-        if nof_chars == 22 {
-            Ok(())
-        } else {
-            Err(String::from("Failure: Invalid length of IBAN for country"))
-        }
-    }
-
-    fn bank_code(&self, iban: &str) -> String {
-        iban.chars()
-            .skip(4)
-            .take(8)
-            .collect::<String>()
     }
 }
 impl Country for De {}

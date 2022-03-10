@@ -1,10 +1,5 @@
-// Netherlands
-/*
-NLkk bbbb cccc cccc cc
-b = BIC Bank code
-c = Account number
-*/
-use super::schema::t_nl;
+// Belgium
+use super::schema::t_be;
 use crate::{country::Country, db::Db};
 use calamine::{open_workbook, Reader, Xlsx};
 use curl::easy::Easy;
@@ -15,43 +10,40 @@ use std::fs::File;
 use std::io::Write;
 
 #[derive(Debug, Serialize, Deserialize, Insertable, Queryable)]
-#[table_name = "t_nl"]
+#[table_name = "t_be"]
 pub struct BankData {
-    //#[serde(alias = "Identifier")]
-    code: String,
-    //#[serde(alias = "Naam betaaldienstverlener")]
+    //#[serde(rename = "T_Identification_Number")]
+    id: String,
+    //#[serde(rename = "T_Institutions_Dutch")]
     name: String,
-    //#[serde(alias = "BIC")]
+    //#[serde(rename = "Biccode")]
     bic: String,
 }
 impl From<BankData> for super::BankData {
     fn from(bank_data: BankData) -> super::BankData {
         super::BankData {
-            code: bank_data.code,
-            name: bank_data.name,
+            code: bank_data.id,
+            name: bank_data.name.clone(),
             zip: 0,
-            city: String::new(),
+            city: "".to_string(),
             bic: Some(bank_data.bic),
         }
     }
 }
 fn create_entry(connection: &SqliteConnection, bank_data: BankData) {
-    diesel::insert_into(t_nl::table)
+    diesel::insert_into(t_be::table)
         .values(&bank_data)
         .execute(connection)
         .expect("Error inserting new task"); // crash on failure is correct here
 }
 fn download_data() -> Result<(), curl::Error> {
     let path = format!(
-        "{}/nl-data-download.xlsx",
+        "{}/be-data-download.xlsx",
         env::var("IBAN_BEAVER_RESOURCES").unwrap_or_else(|_| "./resources".into())
     );
     if let Ok(mut file) = File::create(&path) {
         let mut easy = Easy::new();
-        easy.url("https://www.betaalvereniging.nl/wp-content/uploads/BIC-lijst-NL.xlsx")?;
-        easy.useragent(
-            "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0'",
-        )?;
+        easy.url("https://www.nbb.be/doc/be/be/protocol/r_fulllist_of_codes_current.xlsx")?;
         easy.follow_location(true)?;
         easy.write_function(move |data| {
             file.write_all(data).unwrap();
@@ -63,16 +55,16 @@ fn download_data() -> Result<(), curl::Error> {
 
     Ok(())
 }
-pub struct Nl {}
-impl Db for Nl {
+pub struct Be {}
+impl Db for Be {
     fn get_bank_data(
         &self,
         connection: &SqliteConnection,
         bank_code: &str,
     ) -> Result<super::BankData, String> {
-        use super::schema::t_nl::dsl::*;
-        let data = t_nl
-            .filter(code.eq(bank_code))
+        use super::schema::t_be::dsl::*;
+        let data = t_be
+            .filter(id.eq(bank_code))
             .limit(1)
             .load::<BankData>(connection)
             .expect("Error loading posts")
@@ -85,31 +77,34 @@ impl Db for Nl {
     }
 
     fn fill_table(&self, connection: &SqliteConnection) -> Result<(), Box<dyn std::error::Error>> {
-        //use calamine::{Range, DataType};
         // --- parse xml ---
 
         let path = format!(
-            "{}/nl-data-download.xlsx",
+            "{}/be-data-download.xlsx",
             env::var("IBAN_BEAVER_RESOURCES").unwrap_or_else(|_| "./resources".into())
         );
+        // drop table if it exists already
+        diesel::delete(t_be::table).execute(connection).unwrap();
 
         let mut workbook: Xlsx<_> = open_workbook(path)?;
 
         let range = workbook
-            .worksheet_range("BIC-lijst")
-            .ok_or(calamine::Error::Msg("Cannot find sheet: 'BIC-lijst'"))??;
-
-        diesel::delete(t_nl::table).execute(connection).unwrap();
-        let start_row = 4; // headers are on row 4
+            .worksheet_range("Q_FULL_LIST_XLS_REPORT")
+            .ok_or(calamine::Error::Msg("Cannot find xlsx sheet name: 'Q_FULL_LIST_XLS_REPORT'"))??;
+        
+        diesel::delete(t_be::table).execute(connection).unwrap();
+        let start_row = 2; // Magic number 2, first row has todays date, not headers
         let end_row = range.end().unwrap().0;
         for row in start_row..end_row {
-            let bic = range.get((row as usize, 0)).unwrap().to_string();
-            let code = range.get((row as usize, 1)).unwrap().to_string();
+            let id = range.get((row as usize, 0)).unwrap().to_string();
+            let bic = range.get((row as usize, 1)).unwrap().to_string();
             let name = range.get((row as usize, 2)).unwrap().to_string();
-            let bank_data = BankData { code, name, bic };
+            let bank_data = BankData { id, bic, name };
             //println!("{:?}", bank_data);
             create_entry(connection, bank_data)
         }
+
+
 
         Ok(())
     }
@@ -123,4 +118,4 @@ impl Db for Nl {
         Ok(())
     }
 }
-impl Country for Nl {}
+impl Country for Be {}

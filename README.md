@@ -81,8 +81,9 @@
 IBAN Beaver is a webapp that verifies an IBAN upon request. The response is a json object with information about the associated bank (if any). It is free to use, but keep in mind that this is just a project to learn about webby things and databases. Don't sue me if you use this for billing and something goes wrong.
 
 ### Supported Countries
-* Germany
 * Austria
+* Belgium
+* Germany
 * Netherlands
 
 ### Built With
@@ -135,19 +136,19 @@ env IBAN_BEAVER_RESOURCES=~/.local/share/iban_beaver/resources iban_beaver
 # Client/User
 Verify IBAN
 ```sh
-curl 127.0.0.1:3030/iban/<iban>
+curl 0.0.0.0:3030/iban/<iban>
 ```
 Update database
 ```sh
-curl 127.0.0.1:3030/db/update/<country>
+curl 0.0.0.0:3030/db/update/<country>
 ```
 Fill database without downloading data (can be used to reset things like blacklists)
 ```sh
-curl 127.0.0.1:3030/db/fill/<country>
+curl 0.0.0.0:3030/db/fill/<country>
 ```
 Blacklist IBAN
 ```sh
-curl 127.0.0.1:3030/db/blacklist/<iban>/<add or remove>
+curl 0.0.0.0:3030/db/blacklist/<iban>/<add or remove>
 ```
 
 <!-- ROADMAP -->

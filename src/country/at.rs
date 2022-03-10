@@ -1,6 +1,6 @@
 // Austria
 use super::schema::t_at;
-use super::{Country, Db, Iban};
+use super::{Country, Db};
 use csv;
 use curl::easy::Easy;
 use diesel::{prelude::*, sqlite::SqliteConnection};
@@ -120,23 +120,6 @@ impl Db for At {
         download_data()?;
         self.fill_table(connection)?;
         Ok(())
-    }
-}
-impl Iban for At {
-    fn verify_length(&self, iban: &str) -> Result<(), String> {
-        let nof_chars = iban.chars().count();
-        if nof_chars == 20 {
-            Ok(())
-        } else {
-            Err(String::from("Failure: Invalid length of IBAN for country"))
-        }
-    }
-
-    fn bank_code(&self, iban: &str) -> String {
-        iban.chars()
-            .skip(4)
-            .take(5)
-            .collect::<String>()
     }
 }
 impl Country for At {}
