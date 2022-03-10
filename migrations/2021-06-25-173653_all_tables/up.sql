@@ -13,6 +13,11 @@ CREATE TABLE t_at (
     city TEXT NOT NULL,
     bic TEXT
 );
+CREATE TABLE t_be (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    bic TEXT NOT NULL
+);
 CREATE TABLE t_de (
     id INTEGER NOT NULL PRIMARY KEY,
     code TEXT NOT NULL,

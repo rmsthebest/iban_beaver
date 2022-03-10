@@ -17,6 +17,14 @@ table! {
 }
 
 table! {
+    t_be (id) {
+        id -> Text,
+        name -> Text,
+        bic -> Text,
+    }
+}
+
+table! {
     t_de (id) {
         id -> Integer,
         code -> Text,
@@ -35,9 +43,4 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(
-    blacklist,
-    t_at,
-    t_de,
-    t_nl,
-);
+allow_tables_to_appear_in_same_query!(blacklist, t_at, t_be, t_de, t_nl,);
