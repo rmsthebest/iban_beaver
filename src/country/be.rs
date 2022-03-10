@@ -88,10 +88,13 @@ impl Db for Be {
 
         let mut workbook: Xlsx<_> = open_workbook(path)?;
 
-        let range = workbook
-            .worksheet_range("Q_FULL_LIST_XLS_REPORT")
-            .ok_or(calamine::Error::Msg("Cannot find xlsx sheet name: 'Q_FULL_LIST_XLS_REPORT'"))??;
-        
+        let range =
+            workbook
+                .worksheet_range("Q_FULL_LIST_XLS_REPORT")
+                .ok_or(calamine::Error::Msg(
+                    "Cannot find xlsx sheet name: 'Q_FULL_LIST_XLS_REPORT'",
+                ))??;
+
         diesel::delete(t_be::table).execute(connection).unwrap();
         let start_row = 2; // Magic number 2, first row has todays date, not headers
         let end_row = range.end().unwrap().0;
@@ -103,8 +106,6 @@ impl Db for Be {
             //println!("{:?}", bank_data);
             create_entry(connection, bank_data)
         }
-
-
 
         Ok(())
     }

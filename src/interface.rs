@@ -31,7 +31,10 @@ pub fn verify_request(iban_str: &str) -> IbanResponse {
     let mut iban_response = IbanResponse::new(iban_str);
 
     let iban = match iban::parse(iban_str) {
-        Ok(iban) => {iban_response.valid = true; iban},
+        Ok(iban) => {
+            iban_response.valid = true;
+            iban
+        }
         Err(e) => {
             iban_response.message = e;
             return iban_response;
@@ -86,7 +89,6 @@ pub fn blacklist_request(iban: &str, op: &str) -> DbResponse {
     db_response
 }
 
-
 #[cfg(test)]
 mod tests {
     use serial_test::serial;
@@ -96,7 +98,7 @@ mod tests {
     #[test]
     #[serial]
     fn blacklist() {
-        let add= blacklist_request("HEJHOPP", "ADD");
+        let add = blacklist_request("HEJHOPP", "ADD");
         let remove = blacklist_request("HEJHOPP", "REMOVE");
         println!("WARNING: if you see this message, blacklist test failed and your blacklist may be tainted in your test db");
         assert!(add.success);
@@ -118,6 +120,20 @@ mod tests {
     fn fill_de() {
         assert!(fill_table_request("DE").success);
         assert!(!fill_table_request("DEX").success);
+    }
+
+    // BE
+    #[test]
+    #[ignore]
+    #[serial]
+    fn update_be() {
+        assert!(update_table_request("NL").success);
+    }
+    #[test]
+    #[ignore]
+    #[serial]
+    fn fill_be() {
+        assert!(fill_table_request("NL").success);
     }
 
     // NL
@@ -147,5 +163,4 @@ mod tests {
     fn fill_at() {
         assert!(fill_table_request("AT").success);
     }
-
 }

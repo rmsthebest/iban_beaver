@@ -43,10 +43,4 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(
-    blacklist,
-    t_at,
-    t_be,
-    t_de,
-    t_nl,
-);
+allow_tables_to_appear_in_same_query!(blacklist, t_at, t_be, t_de, t_nl,);
