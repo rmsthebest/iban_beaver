@@ -19,7 +19,7 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Setup Database
-      run: cargo install diesel-cli
+      uses: ducharmemp/diesel-cli-action@0.1.0
            diesel setup
            diesel migration run
     - name: Run tests
