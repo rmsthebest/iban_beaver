@@ -18,9 +18,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build
       run: cargo build --verbose
+    - uses: ducharmemp/diesel-cli-action@0.1.0
     - name: Setup Database
-      uses: ducharmemp/diesel-cli-action@0.1.0
-           diesel setup
+      run: diesel setup
            diesel migration run
     - name: Run tests
       run: cargo test --verbose -- --include-ignored 
