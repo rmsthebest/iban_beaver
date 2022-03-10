@@ -18,5 +18,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build
       run: cargo build --verbose
+    - name: Setup Database
+      run: diesel setup
+           diesel migration run
     - name: Run tests
       run: cargo test --verbose -- --include-ignored 
