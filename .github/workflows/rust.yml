@@ -27,9 +27,8 @@ jobs:
     - name: Diesel CLI - database setup
       uses: kenaniah/diesel-cli-action@v1
       with: 
-        command:
-          setup
-          migration run
-          test --verbose -- --include-ignored
+        run: disel setup
+             diesel migration run
+             cargo test --verbose -- --include-ignored
       env:
         WORKING_DIRECTORIES: ./migrations/
