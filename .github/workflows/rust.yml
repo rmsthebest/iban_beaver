@@ -28,8 +28,8 @@ jobs:
       uses: kenaniah/diesel-cli-action@v1
       with: 
         command:
-          diesel setup
-          diesel migration run
-          cargo test --verbose -- --include-ignored
+          setup
+          migration run
+          test --verbose -- --include-ignored
       env:
         WORKING_DIRECTORIES: ./migrations/
