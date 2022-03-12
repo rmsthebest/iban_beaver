@@ -1,3 +1,4 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::db::Db;
@@ -9,7 +10,7 @@ pub mod de;
 pub mod nl;
 pub mod schema;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct BankData {
     pub code: String,
     pub name: String,
