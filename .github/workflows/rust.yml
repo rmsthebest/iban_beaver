@@ -19,16 +19,19 @@ jobs:
     - name: Build
       run: cargo build --verbose
       
-  test:
+  diesel:
   
     runs-on: ubuntu-latest
     
     steps:
+    - name: install diesel-rs
+      run: sudo apt-get install libsqlite3-dev
+           cargo install diesel_cli --no-default-features --features sqlite
     - name: Diesel CLI - database setup
-      uses: kenaniah/diesel-cli-action@v1
-      with: 
-        run: disel setup
-             diesel migration run
-             cargo test --verbose -- --include-ignored
+      run: diesel setup
+           diesel migration run
+    - name: run tests
+      run:
+        cargo test --verbose -- --include-ignored
       env:
         WORKING_DIRECTORIES: ./migrations/
