@@ -112,7 +112,7 @@ mod tests {
     #[ignore]
     #[serial]
     fn update_de() {
-        assert!(update_table_request("NL").success);
+        assert!(update_table_request("DE").success);
     }
     #[test]
     #[ignore]
@@ -127,13 +127,13 @@ mod tests {
     #[ignore]
     #[serial]
     fn update_be() {
-        assert!(update_table_request("NL").success);
+        assert!(update_table_request("BE").success);
     }
     #[test]
     #[ignore]
     #[serial]
     fn fill_be() {
-        assert!(fill_table_request("NL").success);
+        assert!(fill_table_request("BE").success);
     }
 
     // NL
