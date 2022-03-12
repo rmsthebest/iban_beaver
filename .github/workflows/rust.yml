@@ -2,63 +2,58 @@ name: Rust
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 env:
   CARGO_TERM_COLOR: always
-  
+
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Build
-      run: cargo build --verbose
-    - name: Upload target
-    - uses: actions/upload-artifact@v3.0.0
-      with:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: cargo build --verbose
+      - name: Upload target
+      - uses: actions/upload-artifact@v3.0.0
+        with:
           name: target
           path: target/
-        
+
   diesel:
-  
     runs-on: ubuntu-latest
-    
     steps:
-    - name: install diesel-rs
-      run: |
-           sudo apt-get install libsqlite3-dev
-           cargo install diesel_cli --no-default-features --features sqlite
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Diesel CLI - database setup
-      run: |
-           ls -R
-           diesel setup
-           diesel migration run
-    - name: Upload resources
-    - uses: actions/upload-artifact@v3.0.0
-      with:
+      - name: install diesel-rs
+        run: |
+          sudo apt-get install libsqlite3-dev
+          cargo install diesel_cli --no-default-features --features sqlite
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Diesel CLI - database setup
+        run: |
+          ls -R
+          diesel setup
+          diesel migration run
+      - name: Upload resources
+      - uses: actions/upload-artifact@v3.0.0
+        with:
           name: sqlite3
           path: resources/db.sqlite3
   test:
     runs-on: ubuntu-latest
     steps:
-     - uses: actions/checkout@v3
-     - uses: actions/download-artifact@v3.0.0
-       with:
-        name: target
-     - uses: actions/download-artifact@v3.0.0
-       with:
-        name: sqlite3  
-     - name: run tests
-       run: |
-        ls -R
-        cargo test --verbose -- --include-ignored update
-        cargo test --verbose -- --include-ignored fill
-        cargo test --verbose
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3.0.0
+        with:
+          name: target
+      - uses: actions/download-artifact@v3.0.0
+        with:
+          name: sqlite3
+      - name: run tests
+        run: |
+          ls -R
+          cargo test --verbose -- --include-ignored update
+          cargo test --verbose -- --include-ignored fill
+          cargo test --verbose
