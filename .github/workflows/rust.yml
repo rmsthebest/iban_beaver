@@ -18,6 +18,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build
       run: cargo build --verbose
+      working-directory: target
       
   diesel:
   
@@ -33,7 +34,8 @@ jobs:
     - name: Diesel CLI - database setup
       run: |     
            diesel setup
-           diesel migration run 
+           diesel migration run
+      working-directory: target
   test:
     runs-on: ubuntu-latest
     steps:
@@ -44,3 +46,4 @@ jobs:
         cargo test --verbose -- --include-ignored update
         cargo test --verbose -- --include-ignored fill
         cargo test --verbose
+      working-directory: target
