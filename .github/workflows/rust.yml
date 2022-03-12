@@ -13,24 +13,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build
         run: cargo build --verbose
-      - name: Upload target
-        uses: actions/upload-artifact@v3.0.0
-        with:
-          name: target
-          path: target/
-
-  diesel:
-    runs-on: ubuntu-latest
-    steps:
       - name: install diesel-rs
         run: |
           sudo apt-get install libsqlite3-dev
           cargo install diesel_cli --no-default-features --features sqlite
-      - name: Checkout
-        uses: actions/checkout@v3
       - name: Diesel CLI - database setup
         run: |
           ls -R
@@ -41,17 +30,7 @@ jobs:
         with:
           name: sqlite3
           path: resources/db.sqlite3
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3.0.0
-        with:
-          name: target
-      - uses: actions/download-artifact@v3.0.0
-        with:
-          name: sqlite3
-      - name: run tests
+      - name: test
         run: |
           ls -R
           cargo test --verbose -- --include-ignored update
