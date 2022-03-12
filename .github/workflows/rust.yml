@@ -23,7 +23,7 @@ jobs:
     - uses: actions/upload-artifact@v3.0.0
       with:
           name: target
-          path: ./target/
+          path: target/
         
   diesel:
   
@@ -44,19 +44,21 @@ jobs:
     - name: Upload resources
     - uses: actions/upload-artifact@v3.0.0
       with:
-          name: sqllite3
+          name: sqlite3
           path: resources/db.sqlite3
   test:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Download a Build Artifact
+    - name: Download target
       uses: actions/download-artifact@v3.0.0
       with:
-        path: |
-          ./target/*
-          resources/db.sqlite3
+        name: target
+    - name: Download sqlite3-file
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: sqlite3  
     - name: run tests
       run: |
         ls
