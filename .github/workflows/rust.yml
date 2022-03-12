@@ -35,7 +35,9 @@ jobs:
            diesel setup
            diesel migration run         
     - name: run tests
-      run:
-        cargo test --verbose -- --include-ignored
+      run: |
+        cargo test --verbose -- --include-ignored update
+        cargo test --verbose -- --include-ignored fill
+        cargo test --verbose
       env:
         WORKING_DIRECTORIES: ./migrations/
