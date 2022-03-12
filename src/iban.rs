@@ -45,7 +45,13 @@ mod tests {
     #[serial]
     fn verify_iban() {
         let iban = "DE27100777770209299700".parse::<Iban>().unwrap();
-        let de_ok = verify(iban);
-        assert!(de_ok.is_ok());
+        let de_ok = verify(iban).unwrap();
+        assert!(de_ok.code.eq("10077777"));
+        assert!(de_ok.bic.eq(&Some("NORSDE51XXX".to_string())));
+
+        let iban = "BE68539007547034".parse::<Iban>().unwrap();
+        let be_ok = verify(iban).unwrap();
+        assert!(be_ok.code.eq("539"));
+        assert!(be_ok.bic.eq(&Some("NAP".to_string())));
     }
 }
