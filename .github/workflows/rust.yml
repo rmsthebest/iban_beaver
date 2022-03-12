@@ -17,7 +17,7 @@ jobs:
       - name: Build
         run: cargo build --verbose
       - name: Upload target
-      - uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@v3.0.0
         with:
           name: target
           path: target/
@@ -37,7 +37,7 @@ jobs:
           diesel setup
           diesel migration run
       - name: Upload resources
-      - uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@v3.0.0
         with:
           name: sqlite3
           path: resources/db.sqlite3
