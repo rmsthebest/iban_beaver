@@ -38,7 +38,7 @@ jobs:
       uses: actions/checkout@v3
     - name: Diesel CLI - database setup
       run: |
-           ls
+           ls -R
            diesel setup
            diesel migration run
     - name: Upload resources
@@ -49,19 +49,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Download target
-      uses: actions/download-artifact@v3.0.0
-      with:
+     - uses: actions/checkout@v3
+     - uses: actions/download-artifact@v3.0.0
+       with:
         name: target
-    - name: Download sqlite3-file
-      uses: actions/download-artifact@v3.0.0
-      with:
+     - uses: actions/download-artifact@v3.0.0
+       with:
         name: sqlite3  
-    - name: run tests
-      run: |
-        ls
+     - name: run tests
+       run: |
+        ls -R
         cargo test --verbose -- --include-ignored update
         cargo test --verbose -- --include-ignored fill
         cargo test --verbose
