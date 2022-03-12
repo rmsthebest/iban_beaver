@@ -22,7 +22,6 @@ jobs:
           cargo install diesel_cli --no-default-features --features sqlite
       - name: Diesel CLI - database setup
         run: |
-          ls -R
           diesel setup
           diesel migration run
       - name: Upload resources
@@ -32,7 +31,6 @@ jobs:
           path: resources/db.sqlite3
       - name: test
         run: |
-          ls -R
           cargo test --verbose -- --include-ignored update
           cargo test --verbose -- --include-ignored fill
           cargo test --verbose
