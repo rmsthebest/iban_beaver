@@ -1,0 +1,36 @@
+name: Rust
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build
+        run: cargo build --verbose
+      - name: install diesel-rs
+        run: |
+          sudo apt-get install libsqlite3-dev
+          cargo install diesel_cli --no-default-features --features sqlite
+      - name: Diesel CLI - database setup
+        run: |
+          diesel setup
+          diesel migration run
+      - name: Upload resources
+        uses: actions/upload-artifact@v3.0.0
+        with:
+          name: sqlite3
+          path: resources/db.sqlite3
+      - name: test
+        run: |
+          cargo test --verbose -- --include-ignored update
+          cargo test --verbose -- --include-ignored fill
+          cargo test --verbose
