@@ -25,10 +25,12 @@ jobs:
     
     steps:
     - name: install diesel-rs
-      run: sudo apt-get install libsqlite3-dev
+      run: |
+           sudo apt-get install libsqlite3-dev
            cargo install diesel_cli --no-default-features --features sqlite
     - name: Diesel CLI - database setup
-      run: diesel setup
+      run: |
+           diesel setup
            diesel migration run
     - name: run tests
       run:
