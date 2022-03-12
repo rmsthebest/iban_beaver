@@ -24,11 +24,6 @@ jobs:
         run: |
           diesel setup
           diesel migration run
-      - name: Upload resources
-        uses: actions/upload-artifact@v3.0.0
-        with:
-          name: sqlite3
-          path: resources/db.sqlite3
       - name: test
         run: |
           cargo test --verbose -- --include-ignored update
