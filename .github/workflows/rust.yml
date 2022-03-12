@@ -29,7 +29,8 @@ jobs:
            sudo apt-get install libsqlite3-dev
            cargo install diesel_cli --no-default-features --features sqlite
     - name: Diesel CLI - database setup
-      run: |
+      uses: actions/checkout@v3
+      with: |     
            diesel setup
            diesel migration run
     - name: run tests
