@@ -30,7 +30,7 @@ impl From<BankData> for super::BankData {
         }
     }
 }
-fn create_entry(connection: &SqliteConnection, bank_data: BankData) {
+fn create_entry(connection: &SqliteConnection, bank_data: Vec<BankData>) {
     diesel::insert_into(t_be::table)
         .values(&bank_data)
         .execute(connection)
@@ -98,14 +98,15 @@ impl Db for Be {
         diesel::delete(t_be::table).execute(connection).unwrap();
         let start_row = 2; // Magic number 2, first row has todays date, not headers
         let end_row = range.end().unwrap().0;
+        let mut bank_data = Vec::new();
         for row in start_row..end_row {
             let id = range.get((row as usize, 0)).unwrap().to_string();
             let bic = range.get((row as usize, 1)).unwrap().to_string();
             let name = range.get((row as usize, 2)).unwrap().to_string();
-            let bank_data = BankData { id, bic, name };
+            bank_data.push(BankData { id, bic, name });
             //println!("{:?}", bank_data);
-            create_entry(connection, bank_data)
         }
+        create_entry(connection, bank_data);
 
         Ok(())
     }

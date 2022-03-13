@@ -37,7 +37,7 @@ impl From<BankData> for super::BankData {
     }
 }
 
-fn create_entry(connection: &SqliteConnection, bank_data: BankData) {
+fn create_entry(connection: &SqliteConnection, bank_data: Vec<BankData>) {
     diesel::insert_into(t_at::table)
         .values(&bank_data)
         .execute(connection)
@@ -103,12 +103,9 @@ impl Db for At {
             .delimiter(b';')
             .flexible(true)
             .from_reader(utf8_csv.as_bytes());
-        //println!("{:?}", rdr.headers());
-        for result in rdr.deserialize() {
-            //println!("{:?}", result);
-            let bank_data: BankData = result?;
-            create_entry(connection, bank_data);
-        }
+        // we shouldnt unwrap result, but w/e
+        let bank_data = rdr.deserialize().map(|result| { let bd: BankData = result.unwrap(); bd}).collect::<Vec<BankData>>();
+        create_entry(connection, bank_data);
 
         Ok(())
     }
