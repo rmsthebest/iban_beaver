@@ -35,7 +35,7 @@ impl From<BankData> for super::BankData {
         }
     }
 }
-fn create_entry(connection: &SqliteConnection, bank_data: BankData) {
+fn create_entry(connection: &SqliteConnection, bank_data: Vec<BankData>) {
     diesel::insert_into(t_nl::table)
         .values(&bank_data)
         .execute(connection)
@@ -102,14 +102,14 @@ impl Db for Nl {
         diesel::delete(t_nl::table).execute(connection).unwrap();
         let start_row = 4; // headers are on row 4
         let end_row = range.end().unwrap().0;
+        let mut bank_data = Vec::new();
         for row in start_row..end_row {
             let bic = range.get((row as usize, 0)).unwrap().to_string();
             let code = range.get((row as usize, 1)).unwrap().to_string();
             let name = range.get((row as usize, 2)).unwrap().to_string();
-            let bank_data = BankData { code, name, bic };
-            //println!("{:?}", bank_data);
-            create_entry(connection, bank_data)
+            bank_data.push(BankData { code, name, bic });
         }
+        create_entry(connection, bank_data);
 
         Ok(())
     }

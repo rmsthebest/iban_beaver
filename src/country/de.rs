@@ -36,7 +36,7 @@ impl From<BankData> for super::BankData {
         }
     }
 }
-fn create_entry(connection: &SqliteConnection, bank_data: BankData) {
+fn create_entry(connection: &SqliteConnection, bank_data: Vec<BankData>) {
     diesel::insert_into(t_de::table)
         .values(&bank_data)
         .execute(connection)
@@ -100,10 +100,8 @@ impl Db for De {
         let iter = RangeDeserializerBuilder::new().from_range(&range)?;
 
         // put in db
-        for result in iter {
-            let bank_data: BankData = result?;
-            create_entry(connection, bank_data);
-        }
+        let bank_data = iter.map(|result| result.unwrap()).collect::<Vec<BankData>>();
+        create_entry(connection, bank_data);
         Ok(())
     }
 

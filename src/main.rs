@@ -1,36 +1,45 @@
+#[macro_use]
+extern crate rocket;
 use iban_beaver::interface::*;
-use warp::Filter;
+use rocket::serde::json::Json;
+use rocket_okapi::{openapi, openapi_get_routes, swagger_ui::*};
 
-#[tokio::main]
-async fn main() {
-    // verifies iban
-    let verify_iban = warp::any()
-        .and(warp::path("iban"))
-        .and(warp::path::param::<String>())
-        .map(|iban: String| warp::reply::json(&verify_request(&iban)));
+// Verify and get the BIC for IBAN you enter
+#[openapi]
+#[get("/verify/<iban_str>")]
+fn verify(iban_str: &str) -> Json<IbanResponse> {
+    Json(verify_request(iban_str))
+}
 
-    // attempts to download new data and fill database
-    let database_update = warp::any()
-        .and(warp::path!("db" / "update" / String))
-        .map(|country: String| warp::reply::json(&update_table_request(&country)));
+#[openapi]
+#[get("/blacklist/<iban_str>/<add_or_remove>")]
+fn blacklist(iban_str: &str, add_or_remove: &str) -> Json<DbResponse> {
+    Json(blacklist_request(iban_str, add_or_remove))
+}
 
-    // fills database with data that is already downloaded
-    let fill_database = warp::any()
-        .and(warp::path!("db" / "fill" / String))
-        .map(|country: String| warp::reply::json(&fill_table_request(&country)));
+#[openapi]
+#[get("/update/<country_code>")]
+fn update(country_code: &str) -> Json<DbResponse> {
+    Json(update_table_request(country_code))
+}
 
-    // blacklists iban
-    let blacklist = warp::any()
-        .and(warp::path!("db" / "blacklist" / String / String))
-        .map(|iban: String, op: String| warp::reply::json(&blacklist_request(&iban, &op)));
+#[openapi]
+#[get("/re-fill/<country_code>")]
+fn fill(country_code: &str) -> Json<DbResponse> {
+    Json(fill_table_request(country_code))
+}
 
-    let routes = warp::get().and(
-        verify_iban
-            .or(database_update)
-            .or(fill_database)
-            .or(blacklist),
-    );
-    warp::serve(routes).run(([0, 0, 0, 0], 3030)).await
+#[launch]
+fn rocket() -> _ {
+    rocket::build()
+        .mount("/", openapi_get_routes![verify, blacklist, update, fill])
+        .mount(
+            "/swagger-ui/",
+            make_swagger_ui(&SwaggerUIConfig {
+                url: "../openapi.json".to_owned(),
+                ..Default::default()
+            }),
+        )
 }
 
 /*

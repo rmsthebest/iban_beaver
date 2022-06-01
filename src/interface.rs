@@ -2,9 +2,10 @@ use crate::country::get_country;
 use crate::country::BankData;
 use crate::db::{blacklist, establish_connection};
 use crate::iban;
-use serde::{Deserialize, Serialize};
+use rocket::serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct IbanResponse {
     iban: String,
     valid: bool,
@@ -21,7 +22,7 @@ impl IbanResponse {
         }
     }
 }
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default, JsonSchema)]
 pub struct DbResponse {
     pub success: bool,
     pub message: String,

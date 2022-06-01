@@ -89,7 +89,7 @@ IBAN Beaver is a webapp that verifies an IBAN upon request. The response is a js
 ### Built With
 
 * [Diesel](https://diesel.rs)
-* [Warp](https://github.com/seanmonstar/warp)
+* [Rocket](https://rocket.rs)
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -100,9 +100,10 @@ Only tested on GNU Linux.
 * rust / cargo
 * base-devel / build-essential / your distros dev meta-package
 * diesel_cli, needed for diesel migrations. See their doc.
+* sqlite3-dev
   ```sh
    cargo install diesel_cli # generic
-   sudo pacman -S diesel-cli # arch
+   sudo pacman -S diesel-cli sqlite3-dev # arch
   ```
 
 ### Installation
@@ -117,6 +118,7 @@ Only tested on GNU Linux.
    diesel migration run # create the tables. can use redo to drop table first
    cargo run --release
    ```
+There's also a docker container now, if you prefer that.
 
 
 
@@ -134,21 +136,29 @@ env IBAN_BEAVER_RESOURCES=~/.local/share/iban_beaver/resources iban_beaver
 ```
 
 # Client/User
+
+Interface is exposed at
+http://localhost:3030/swagger-ui
+
 Verify IBAN
 ```sh
-curl 0.0.0.0:3030/iban/<iban>
+curl 0.0.0.0:3030/verify/<iban>
+curl 0.0.0.0:3030/verify/DE27100777770209299700
 ```
 Update database
 ```sh
-curl 0.0.0.0:3030/db/update/<country>
-```
-Fill database without downloading data (can be used to reset things like blacklists)
-```sh
-curl 0.0.0.0:3030/db/fill/<country>
+curl 0.0.0.0:3030/update/<country>
+curl 0.0.0.0:3030/update/DE
 ```
 Blacklist IBAN
 ```sh
 curl 0.0.0.0:3030/db/blacklist/<iban>/<add or remove>
+curl 0.0.0.0:3030/db/blacklist/DE27100777770209299700/add
+```
+Fill database without downloading new data, you should never have to do this.
+```sh
+curl 0.0.0.0:3030/re-fill/<country>
+curl 0.0.0.0:3030/re-fill/DE
 ```
 
 <!-- ROADMAP -->
